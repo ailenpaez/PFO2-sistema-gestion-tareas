@@ -7,110 +7,136 @@ app = Flask(__name__)
 DATABASE = "tareas.db"
 
 
-def conectar_db():
-    conexion = sqlite3.connect(DATABASE)
-    conexion.row_factory = sqlite3.Row
-    return conexion
+def connect_db():
+    connection = sqlite3.connect(DATABASE, timeout=5)
+    connection.row_factory = sqlite3.Row
+    return connection
 
 
-def crear_tablas():
-    conexion = conectar_db()
+def create_tables():
+    connection = connect_db()
 
-    conexion.execute("""
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL
-        )
-    """)
+    try:
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL
+            )
+        """)
 
-    conexion.commit()
-    conexion.close()
+        connection.commit()
+
+    finally:
+        connection.close()
 
 
 @app.route("/")
-def inicio():
+def home():
     return jsonify({
-        "mensaje": "Bienvenido al SGT: Sistema de Gestión de Tareas",
-        "estado": "Servidor funcionando correctamente"
+        "message": "Welcome to the Task Management System",
+        "status": "Server is running correctly"
     })
 
 
 @app.route("/registro", methods=["POST"])
-def registro():
-    datos = request.get_json()
+def register():
+    data = request.get_json()
 
-    usuario = datos.get("usuario")
-    contraseña = datos.get("contraseña")
+    username = data.get("username")
+    password = data.get("password")
 
-    if not usuario or not contraseña:
+    if not username or not password:
         return jsonify({
-            "error": "El usuario y la contraseña son obligatorios"
+            "error": "Username and password are required"
         }), 400
 
-    password_hash = generate_password_hash(contraseña)
+    password_hash = generate_password_hash(password)
+
+    connection = connect_db()
 
     try:
-        conexion = conectar_db()
-
-        conexion.execute(
+        connection.execute(
             """
-            INSERT INTO usuarios (usuario, password_hash)
+            INSERT INTO users (username, password_hash)
             VALUES (?, ?)
             """,
-            (usuario, password_hash)
+            (username, password_hash)
         )
 
-        conexion.commit()
-        conexion.close()
+        connection.commit()
 
         return jsonify({
-            "mensaje": "Usuario registrado correctamente"
+            "message": "User registered successfully"
         }), 201
 
     except sqlite3.IntegrityError:
         return jsonify({
-            "error": "El usuario ya existe"
+            "error": "Username already exists"
         }), 409
+
+    finally:
+        connection.close()
 
 
 @app.route("/login", methods=["POST"])
 def login():
-    datos = request.get_json()
+    data = request.get_json()
 
-    usuario = datos.get("usuario")
-    contraseña = datos.get("contraseña")
+    username = data.get("username")
+    password = data.get("password")
 
-    if not usuario or not contraseña:
+    if not username or not password:
         return jsonify({
-            "error": "El usuario y la contraseña son obligatorios"
+            "error": "Username and password are required"
         }), 400
 
-    conexion = conectar_db()
+    connection = connect_db()
 
-    usuario_db = conexion.execute(
-        "SELECT * FROM usuarios WHERE usuario = ?",
-        (usuario,)
-    ).fetchone()
+    try:
+        user = connection.execute(
+            "SELECT * FROM users WHERE username = ?",
+            (username,)
+        ).fetchone()
 
-    conexion.close()
+    finally:
+        connection.close()
 
-    if usuario_db is None:
+    if user is None:
         return jsonify({
-            "error": "Usuario o contraseña incorrectos"
+            "error": "Invalid username or password"
         }), 401
 
-    if not check_password_hash(usuario_db["password_hash"], contraseña):
+    if not check_password_hash(user["password_hash"], password):
         return jsonify({
-            "error": "Usuario o contraseña incorrectos"
+            "error": "Invalid username or password"
         }), 401
 
     return jsonify({
-        "mensaje": "Inicio de sesión exitoso",
-        "usuario": usuario
+        "message": "Login successful",
+        "username": username
     }), 200
 
 
+@app.route("/tareas", methods=["GET"])
+def tasks():
+    return """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Task Management System</title>
+    </head>
+    <body>
+        <h1>Welcome to the Task Management System!</h1>
+        <p>You have logged in successfully.</p>
+        <p>This is the task management area.</p>
+    </body>
+    </html>
+    """
+
+
 if __name__ == "__main__":
-    crear_tablas()
+    create_tables()
     app.run(debug=True)
