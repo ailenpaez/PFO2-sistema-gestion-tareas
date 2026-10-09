@@ -200,37 +200,37 @@ Las siguientes capturas documentan las pruebas realizadas desde el cliente de co
 
 #### Registro exitoso
 
-![Registro exitoso](/SS-envidencias/registroExitoso.png)
+![Registro exitoso](/SS-evidencias/registroExitoso.png)
 
 #### Intento de registro con usuario existente
 
-![Usuario existente](/SS-envidencias/usuarioExistente.png)
+![Usuario existente](/SS-evidencias/usuarioExistente.png)
 
 #### Inicio de sesión exitoso
 
-![Inicio de sesión exitoso](/SS-envidencias/loginExitoso.png)
+![Inicio de sesión exitoso](/SS-evidencias/loginExitoso.png)
 
 #### Inicio de sesión con contraseña incorrecta
 
-![Contraseña incorrecta](/SS-envidencias/passwordIncorrecta.png)
+![Contraseña incorrecta](/SS-evidencias/passwordIncorrecta.png)
 
 #### Inicio de sesión con usuario inexistente
 
-![Usuario inexistente](/SS-envidencias/loginUsuarioInexistente.png)
+![Usuario inexistente](/SS-evidencias/loginUsuarioInexistente.png)
 
 #### Página HTML de la sección de tareas
 
-![Página de tareas](/SS-envidencias/inicioTareas.png)
+![Página de tareas](/SS-evidencias/inicioTareas.png)
 
 ### 10.3. Base de datos SQLite
 
 #### Usuarios almacenados
 
-![Vista de la base de datos SQLite](/SS-envidencias/vista_database.png)
+![Vista de la base de datos SQLite](/SS-evidencias/vista_database.png)
 
 #### Contraseña almacenada mediante hash
 
-![Contraseña almacenada mediante hash](/SS-envidencias/passHasheada.png)
+![Contraseña almacenada mediante hash](/SS-evidencias/passHasheada.png)
 
 ## 11. Repositorio y publicación
 
