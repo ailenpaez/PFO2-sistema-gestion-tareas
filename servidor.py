@@ -24,9 +24,7 @@ def create_tables():
                 password_hash TEXT NOT NULL
             )
         """)
-
         connection.commit()
-
     finally:
         connection.close()
 
@@ -41,10 +39,10 @@ def home():
 
 @app.route("/registro", methods=["POST"])
 def register():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
 
-    username = data.get("username")
-    password = data.get("password")
+    username = data.get("usuario")
+    password = data.get("contraseña")
 
     if not username or not password:
         return jsonify({
@@ -52,7 +50,6 @@ def register():
         }), 400
 
     password_hash = generate_password_hash(password)
-
     connection = connect_db()
 
     try:
@@ -63,7 +60,6 @@ def register():
             """,
             (username, password_hash)
         )
-
         connection.commit()
 
         return jsonify({
@@ -81,10 +77,10 @@ def register():
 
 @app.route("/login", methods=["POST"])
 def login():
-    data = request.get_json()
+    data = request.get_json(silent=True) or {}
 
-    username = data.get("username")
-    password = data.get("password")
+    username = data.get("usuario")
+    password = data.get("contraseña")
 
     if not username or not password:
         return jsonify({
@@ -98,7 +94,6 @@ def login():
             "SELECT * FROM users WHERE username = ?",
             (username,)
         ).fetchone()
-
     finally:
         connection.close()
 
