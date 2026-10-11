@@ -1,6 +1,8 @@
 # Sistema de Gestión de Tareas - PFO 2 PSR
 
-**Repositorio del proyecto:** [PFO2 - Sistema de Gestión de Tareas](https://github.com/ailenpaez/PFO2-sistema-gestion-tareas)
+• **Repositorio del proyecto:** [PFO 2 - Sistema de Gestión de Tareas](https://github.com/ailenpaez/PFO2-sistema-gestion-tareas)
+
+• **Acceso desde GitHub Pages**[PFO 2 - Deploy GitHub Pages](https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/)
 
 ## 1. Descripción del proyecto
 
@@ -115,12 +117,12 @@ El servidor se ejecuta localmente en [http://127.0.0.1:5000](http://127.0.0.1:50
 
 ## 8. Endpoints de la API
 
-| Método | Endpoint | Descripción |
-|---|---|---|
-| GET | `/` | Devuelve un mensaje de bienvenida y el estado del servidor. |
-| POST | `/registro` | Registra un usuario en la base de datos SQLite. |
-| POST | `/login` | Valida las credenciales del usuario. |
-| GET | `/tareas` | Muestra una página HTML de bienvenida para la sección de tareas. |
+| Método | Endpoint    | Descripción                                                      |
+| ------ | ----------- | ---------------------------------------------------------------- |
+| GET    | `/`         | Devuelve un mensaje de bienvenida y el estado del servidor.      |
+| POST   | `/registro` | Registra un usuario en la base de datos SQLite.                  |
+| POST   | `/login`    | Valida las credenciales del usuario.                             |
+| GET    | `/tareas`   | Muestra una página HTML de bienvenida para la sección de tareas. |
 
 ### 8.1. Registro de usuarios
 
@@ -236,10 +238,9 @@ Las siguientes capturas documentan las pruebas realizadas desde el cliente de co
 
 El código fuente y la documentación se encuentran disponibles en GitHub:
 
-[PFO2 - Sistema de Gestión de Tareas](https://github.com/ailenpaez/PFO2-sistema-gestion-tareas)
-
-**Enlace de GitHub Pages:** pendiente de configurar y verificar.
+* [PFO2 - Sistema de Gestión de Tareas](https://github.com/ailenpaez/PFO2-sistema-gestion-tareas)
+* [Acceso desde GitHub Pages](https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/)
 
 ## 12. Autoría
 
-Trabajo realizado para el PFO2, Programación sobre redes.
+Trabajo realizado por Ailén Páez de la comisión E para el PFO2, Programación sobre redes.
