@@ -1,1185 +1,1355 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="PFO2: Sistema de Gestión de Tareas desarrollado con Python, Flask y SQLite.">
-  <title>Sistema de Gestión de Tareas | PFO2</title>
-
-  <!-- Tipografías -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Iconos Lucide -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-
-  <style>
-    :root {
-      --fondo: #0b1220;
-      --superficie: #111c2e;
-      --superficie-2: #162338;
-      --borde: #293950;
-      --azul: #60a5fa;
-      --azul-fuerte: #2563eb;
-      --texto: #e5edf8;
-      --suave: #a9b8cb;
-      --verde: #34d399;
-      --violeta: #a78bfa;
-      --naranja: #fbbf24;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-      scroll-padding-top: 90px;
-    }
-
-    body {
-      margin: 0;
-      background: var(--fondo);
-      color: var(--texto);
-      font-family: "Inter", sans-serif;
-      line-height: 1.65;
-    }
-
-    a {
-      color: var(--azul);
-    }
-
-    .contenedor {
-      width: min(1120px, 90%);
-      margin: 0 auto;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: rgba(11, 18, 32, 0.94);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--borde);
-    }
-
-    nav {
-      min-height: 70px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 22px;
-      padding: 14px 0;
-    }
-
-    .marca {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--texto);
-      text-decoration: none;
-      font-weight: 800;
-    }
-
-    .marca svg {
-      width: 27px;
-      color: var(--azul);
-      flex-shrink: 0;
-    }
-
-    .enlaces {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 18px;
-    }
-
-    .enlaces a {
-      text-decoration: none;
-      color: var(--suave);
-      font-size: 0.92rem;
-      transition: color 0.2s;
-    }
-
-    .enlaces a:hover {
-      color: var(--azul);
-    }
-
-    .hero {
-      padding: 78px 0;
-      background:
-        radial-gradient(ellipse at 85% 15%, #18345a 0, transparent 38%),
-        linear-gradient(135deg, #101c30, #0b1220);
-      border-bottom: 1px solid var(--borde);
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 45px;
-      align-items: center;
-    }
-
-    .etiqueta {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 13px;
-      border-radius: 30px;
-      color: #bfdbfe;
-      background: #1d3557;
-      font-size: 0.9rem;
-      font-weight: 700;
-    }
-
-    .etiqueta svg {
-      width: 17px;
-    }
-
-    h1 {
-      color: #f8fafc;
-      font-family: "JetBrains Mono", monospace;
-      font-size: clamp(2rem, 4.5vw, 3.5rem);
-      font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -1.5px;
-      overflow-wrap: anywhere;
-      margin: 22px 0;
-    }
-
-    .hero p {
-      color: #b6c5d8;
-      font-size: 1.1rem;
-      max-width: 680px;
-    }
-
-    .botones {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 26px;
-    }
-
-    .boton {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      gap: 9px;
-      padding: 12px 18px;
-      border: 1px solid var(--borde);
-      border-radius: 10px;
-      text-decoration: none;
-      font-weight: 700;
-      transition: background 0.2s, transform 0.2s;
-    }
-
-    .boton:hover {
-      transform: translateY(-2px);
-    }
-
-    .boton svg {
-      width: 19px;
-      height: 19px;
-    }
-
-    .boton-principal {
-      color: #fff;
-      background: var(--azul-fuerte);
-      border-color: var(--azul-fuerte);
-    }
-
-    .boton-principal:hover {
-      background: #1d4ed8;
-    }
-
-    .boton-secundario {
-      color: var(--texto);
-      background: var(--superficie-2);
-    }
-
-    .boton-secundario:hover {
-      background: #20314a;
-    }
-
-    .visual {
-      padding: 28px;
-      border-radius: 20px;
-      border: 1px solid #344b69;
-      background: #111e31;
-      box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
-    }
-
-    .visual-titulo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid var(--borde);
-      color: #f1f5f9;
-      font-weight: 800;
-    }
-
-    .visual-titulo svg {
-      color: var(--azul);
-    }
-
-    .visual-linea {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding-top: 17px;
-      color: var(--suave);
-    }
-
-    .visual-linea svg {
-      width: 20px;
-      color: var(--verde);
-      flex-shrink: 0;
-    }
-
-    section {
-      padding: 54px 0;
-    }
-
-    .titulo-seccion {
-      margin: 0 0 8px;
-      color: #f1f5f9;
-      font-family: "JetBrains Mono", monospace;
-      font-size: clamp(1.35rem, 3vw, 1.8rem);
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      overflow-wrap: anywhere;
-    }
-
-    .subtitulo {
-      color: var(--suave);
-      margin: 0 0 28px;
-    }
-
-    .rejilla {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .tarjeta {
-      min-width: 0;
-      background: var(--superficie);
-      border: 1px solid var(--borde);
-      border-radius: 16px;
-      padding: 23px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-      transition: border-color 0.2s, transform 0.2s;
-    }
-
-    .tarjeta:hover {
-      border-color: #405a7b;
-      transform: translateY(-3px);
-    }
-
-    .icono {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      margin-bottom: 17px;
-    }
-
-    .icono svg {
-      width: 25px;
-      height: 25px;
-    }
-
-    .icono-azul {
-      color: var(--azul);
-      background: #1a3150;
-    }
-
-    .icono-verde {
-      color: var(--verde);
-      background: #12392f;
-    }
-
-    .icono-violeta {
-      color: var(--violeta);
-      background: #30244c;
-    }
-
-    .icono-naranja {
-      color: var(--naranja);
-      background: #3b2c19;
-    }
-
-    .tarjeta h3 {
-      color: #eaf1fb;
-      font-size: 1.03rem;
-      margin: 0 0 8px;
-    }
-
-    .tarjeta p {
-      color: var(--suave);
-      font-size: 0.94rem;
-      margin: 0;
-    }
-
-    .dos-columnas {
-      display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 38px;
-      align-items: start;
-    }
-
-    .texto-proyecto p {
-      color: var(--suave);
-    }
-
-    .aviso {
-      display: flex;
-      gap: 13px;
-      margin-top: 22px;
-      padding: 18px;
-      background: #122641;
-      border: 1px solid #254c79;
-      border-radius: 12px;
-    }
-
-    .aviso > svg {
-      width: 23px;
-      flex-shrink: 0;
-      color: var(--azul);
-    }
-
-    .aviso strong {
-      color: #bfdbfe;
-    }
-
-    .aviso p {
-      margin: 5px 0 0;
-      color: #b6c8df;
-      font-size: 0.93rem;
-    }
-
-    .tecnologias {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .tecnologia {
-      min-height: 96px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      background: var(--superficie);
-      border: 1px solid var(--borde);
-      border-radius: 12px;
-      padding: 12px 6px;
-      text-align: center;
-      font-size: 0.88rem;
-    }
-
-    .tecnologia svg {
-      width: 27px;
-      height: 27px;
-      color: var(--azul);
-    }
-
-    code {
-      color: #bfdbfe;
-      background: #1b2c43;
-      border: 1px solid #2c405a;
-      padding: 3px 6px;
-      border-radius: 5px;
-      font-family: "JetBrains Mono", monospace;
-      font-size: 0.88em;
-      overflow-wrap: anywhere;
-    }
-
-    .evidencias {
-      background: #0e1828;
-      border-top: 1px solid var(--borde);
-      border-bottom: 1px solid var(--borde);
-    }
-
-    .grupo-evidencias {
-      margin-top: 34px;
-    }
-
-    .grupo-evidencias > h3 {
-      color: #dce8f8;
-      margin-bottom: 16px;
-      font-family: "JetBrains Mono", monospace;
-      font-weight: 700;
-    }
-
-    .rejilla-evidencias {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 18px;
-    }
-
-    .evidencia {
-      padding: 0;
-      overflow: hidden;
-    }
-
-    .evidencia-info {
-      padding: 17px 18px;
-    }
-
-    .evidencia-info h3 {
-      margin: 0 0 5px;
-    }
-
-    .evidencia-info p {
-      margin: 0;
-    }
-
-    .evidencia img {
-      display: block;
-      width: 100%;
-      height: 205px;
-      object-fit: contain;
-      background: #0b1220;
-      border-top: 1px solid var(--borde);
-      cursor: zoom-in;
-      transition: opacity 0.2s;
-    }
-
-    .evidencia img:hover {
-      opacity: 0.85;
-    }
-
-    /* Visor de imágenes ampliadas */
-    .lightbox {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 14px;
-      padding: 60px 24px 24px;
-      background: rgba(3, 7, 18, 0.94);
-      backdrop-filter: blur(8px);
-    }
-
-    .lightbox.activo {
-      display: flex;
-    }
-
-    .lightbox-imagen {
-      display: block;
-      max-width: min(1100px, 95vw);
-      max-height: 78vh;
-      width: auto;
-      height: auto;
-      object-fit: contain;
-      border: 1px solid #344b69;
-      border-radius: 12px;
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
-      cursor: zoom-out;
-    }
-
-    .lightbox-caption {
-      max-width: 90%;
-      color: #e5edf8;
-      text-align: center;
-      font-size: 0.95rem;
-    }
-
-    .lightbox-cerrar {
-      position: absolute;
-      top: 18px;
-      right: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 44px;
-      height: 44px;
-      color: #fff;
-      background: #17263c;
-      border: 1px solid #344b69;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.2s;
-    }
-
-    .lightbox-cerrar:hover {
-      background: #263d5d;
-      transform: scale(1.05);
-    }
-
-    .lightbox-cerrar svg {
-      width: 22px;
-      height: 22px;
-    }
-
-    body.lightbox-abierto {
-      overflow: hidden;
-    }
-
-    .repositorio {
-      padding: 0 0 64px;
-    }
-
-    .repositorio-tarjeta {
-      padding: 34px;
-      border: 1px solid #344b69;
-      border-radius: 18px;
-      background: linear-gradient(120deg, #15243a, #111c2e);
-    }
-
-    .repositorio-cabecera {
-      display: flex;
-      align-items: flex-start;
-      gap: 18px;
-    }
-
-    .repositorio-icono {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 54px;
-      height: 54px;
-      flex-shrink: 0;
-      border-radius: 14px;
-      background: #1e3a5f;
-      color: var(--azul);
-    }
-
-    .repositorio-icono svg {
-      width: 28px;
-      height: 28px;
-    }
-
-    .repositorio-tarjeta p {
-      color: var(--suave);
-      margin: 6px 0 0;
-    }
-
-    footer {
-      width: 100%;
-      margin: 0;
-      padding: 28px 0;
-      background: #070d17;
-      border-top: 1px solid var(--borde);
-    }
-
-    .footer-contenido {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-
-    footer strong {
-      color: #e5edf8;
-    }
-
-    footer p {
-      margin: 4px 0 0;
-      color: #91a3bb;
-      font-size: 0.9rem;
-    }
-
-    footer a {
-      color: var(--azul);
-      text-decoration: none;
-    }
-
-    @media (max-width: 950px) {
-      .hero-grid {
-        grid-template-columns: 1fr;
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="PFO2: Sistema de Gestión de Tareas desarrollado con Python, Flask y SQLite."
+    />
+    <title>Sistema de Gestión de Tareas | PFO2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Versión fija de Lucide (los íconos de marcas como GitHub/LinkedIn se incluyen inline abajo) -->
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+    <style>
+      :root {
+        --fondo: #0b1220;
+        --superficie: #111c2e;
+        --superficie-2: #162338;
+        --borde: #293950;
+        --azul: #60a5fa;
+        --azul-fuerte: #2563eb;
+        --texto: #e5edf8;
+        --suave: #a9b8cb;
+        --verde: #34d399;
+        --violeta: #a78bfa;
+        --naranja: #fbbf24;
       }
 
-      .visual {
-        max-width: 460px;
+      * {
+        box-sizing: border-box;
       }
 
-      .rejilla {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 90px;
       }
 
-      .dos-columnas {
-        grid-template-columns: 1fr;
+      body {
+        margin: 0;
+        background: var(--fondo);
+        color: var(--texto);
+        font-family: "Inter", "Segoe UI", Arial, sans-serif;
+        line-height: 1.65;
       }
-    }
 
-    @media (max-width: 650px) {
+      body.sin-scroll {
+        overflow: hidden;
+      }
+
+      a {
+        color: var(--azul);
+      }
+
+      .contenedor {
+        width: min(1120px, 90%);
+        margin: 0 auto;
+      }
+
+      strong,
+      h1,
+      h2,
+      h3,
+      .marca,
+      .boton {
+        font-weight: 700;
+      }
+
+      code,
+      .etiqueta,
+      .visual-linea,
+      h1,
+      h2,
+      h3,
+      .marca {
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      /* Íconos SVG inline (sprite) */
+      .ic {
+        width: 1em;
+        height: 1em;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      /* ---------- Header ---------- */
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: rgba(11, 18, 32, 0.94);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--borde);
+      }
+
       nav {
-        align-items: flex-start;
-        flex-direction: column;
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 22px;
+        padding: 14px 0;
+      }
+
+      .marca {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--texto);
+        text-decoration: none;
+      }
+
+      .marca svg {
+        width: 27px;
+        height: 27px;
+        color: var(--azul);
       }
 
       .enlaces {
-        gap: 10px 15px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px;
+      }
+      .enlaces a {
+        text-decoration: none;
+        color: var(--suave);
+        font-size: 0.92rem;
+      }
+      .enlaces a:hover {
+        color: var(--azul);
       }
 
+      /* ---------- Hero ---------- */
       .hero {
+        padding: 78px 0;
+        background:
+          radial-gradient(ellipse at 85% 15%, #18345a 0, transparent 38%),
+          linear-gradient(135deg, #101c30, #0b1220);
+        border-bottom: 1px solid var(--borde);
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 45px;
+        align-items: center;
+      }
+
+      .etiqueta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 13px;
+        border-radius: 30px;
+        color: #bfdbfe;
+        background: #1d3557;
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      .etiqueta svg {
+        width: 17px;
+        height: 17px;
+      }
+
+      h1 {
+        color: #f8fafc;
+        font-size: clamp(2rem, 4.4vw, 3.2rem);
+        line-height: 1.1;
+        letter-spacing: -1px;
+        margin: 22px 0;
+      }
+
+      .hero p {
+        color: #b6c5d8;
+        font-size: 1.1rem;
+        max-width: 680px;
+      }
+
+      .botones {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 26px;
+      }
+
+      .boton {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 9px;
+        padding: 12px 18px;
+        border: 1px solid var(--borde);
+        border-radius: 10px;
+        text-decoration: none;
+        transition:
+          background 0.2s,
+          transform 0.2s;
+      }
+
+      .boton:hover {
+        transform: translateY(-2px);
+      }
+      .boton svg {
+        width: 19px;
+        height: 19px;
+      }
+
+      .boton-principal {
+        color: #fff;
+        background: var(--azul-fuerte);
+        border-color: var(--azul-fuerte);
+      }
+      .boton-principal:hover {
+        background: #1d4ed8;
+      }
+      .boton-secundario {
+        color: var(--texto);
+        background: var(--superficie-2);
+      }
+      .boton-secundario:hover {
+        background: #20314a;
+      }
+
+      .visual {
+        padding: 28px;
+        border-radius: 20px;
+        border: 1px solid #344b69;
+        background: #111e31;
+        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
+      }
+
+      .visual-titulo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--borde);
+        color: #f1f5f9;
+        font-weight: 700;
+      }
+
+      .visual-titulo svg {
+        color: var(--azul);
+      }
+
+      .visual-linea {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-top: 17px;
+        color: var(--suave);
+      }
+
+      .visual-linea svg {
+        width: 20px;
+        height: 20px;
+        color: var(--verde);
+      }
+
+      /* ---------- Secciones ---------- */
+      section {
         padding: 54px 0;
       }
 
-      .rejilla,
-      .rejilla-evidencias {
-        grid-template-columns: 1fr;
+      .titulo-seccion {
+        margin: 0 0 8px;
+        color: #f1f5f9;
+        font-size: clamp(1.6rem, 3vw, 2rem);
+        letter-spacing: -0.3px;
+      }
+
+      .subtitulo {
+        color: var(--suave);
+        margin: 0 0 28px;
+      }
+
+      .rejilla {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .tarjeta {
+        min-width: 0;
+        background: var(--superficie);
+        border: 1px solid var(--borde);
+        border-radius: 16px;
+        padding: 23px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+
+      .tarjeta:hover {
+        border-color: #405a7b;
+        transform: translateY(-3px);
+      }
+
+      .icono {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        margin-bottom: 17px;
+      }
+
+      .icono svg {
+        width: 25px;
+        height: 25px;
+      }
+
+      .icono-azul {
+        color: var(--azul);
+        background: #1a3150;
+      }
+      .icono-verde {
+        color: var(--verde);
+        background: #12392f;
+      }
+      .icono-violeta {
+        color: var(--violeta);
+        background: #30244c;
+      }
+      .icono-naranja {
+        color: var(--naranja);
+        background: #3b2c19;
+      }
+
+      .tarjeta h3 {
+        color: #eaf1fb;
+        font-size: 1.03rem;
+        margin: 0 0 8px;
+      }
+      .tarjeta p {
+        color: var(--suave);
+        font-size: 0.94rem;
+        margin: 0;
+      }
+
+      .dos-columnas {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 38px;
+        align-items: start;
+      }
+
+      .texto-proyecto p {
+        color: var(--suave);
+      }
+
+      .aviso {
+        display: flex;
+        gap: 13px;
+        margin-top: 22px;
+        padding: 18px;
+        background: #122641;
+        border: 1px solid #254c79;
+        border-radius: 12px;
+      }
+
+      .aviso > svg {
+        width: 23px;
+        height: 23px;
+        flex-shrink: 0;
+        color: var(--azul);
+      }
+      .aviso strong {
+        color: #bfdbfe;
+      }
+      .aviso p {
+        margin: 5px 0 0;
+        color: #b6c8df;
+        font-size: 0.93rem;
       }
 
       .tecnologias {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      .tecnologia {
+        min-height: 96px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        background: var(--superficie);
+        border: 1px solid var(--borde);
+        border-radius: 12px;
+        padding: 12px 6px;
+        text-align: center;
+        font-size: 0.88rem;
+      }
+
+      .tecnologia svg {
+        width: 27px;
+        height: 27px;
+        color: var(--azul);
+      }
+
+      code {
+        color: #bfdbfe;
+        background: #1b2c43;
+        border: 1px solid #2c405a;
+        padding: 3px 6px;
+        border-radius: 5px;
+        font-size: 0.9em;
+      }
+
+      /* ---------- Respuestas conceptuales ---------- */
+      .respuestas {
+        display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .respuesta {
+        min-width: 0;
+        padding: 28px;
+        background: var(--superficie);
+        border: 1px solid var(--borde);
+        border-radius: 16px;
+      }
+
+      .respuesta-cabecera {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 16px;
+      }
+
+      .respuesta-cabecera .icono {
+        margin: 0;
+        flex-shrink: 0;
+      }
+
+      .respuesta h3 {
+        margin: 0;
+        color: #eaf1fb;
+        font-size: 1.15rem;
+        line-height: 1.35;
+      }
+
+      .respuesta p {
+        margin: 0 0 14px;
+        color: var(--suave);
+        font-size: 0.97rem;
+        max-width: 70ch;
+      }
+
+      .respuesta p:last-child {
+        margin-bottom: 0;
+      }
+
+      .respuesta p strong {
+        color: #dce8f8;
+      }
+
+      /* ---------- Evidencias ---------- */
+      .evidencias {
+        background: #0e1828;
+        border-top: 1px solid var(--borde);
+        border-bottom: 1px solid var(--borde);
+      }
+
+      .grupo-evidencias {
+        margin-top: 34px;
+      }
+      .grupo-evidencias > h3 {
+        color: #dce8f8;
+        margin: 0 0 16px;
+      }
+
+      .lista-evidencias {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+      }
+
+      .lista-evidencias li {
+        background: var(--superficie);
+        border: 1px solid var(--borde);
+        border-radius: 10px;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+
+      .lista-evidencias li:hover {
+        border-color: var(--azul);
+        transform: translateX(4px);
+      }
+
+      .lista-evidencias a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        color: var(--azul);
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .lista-evidencias a svg {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+        opacity: 0.7;
+      }
+      .lista-evidencias a:hover {
+        color: #bfdbfe;
+      }
+
+      /* ---------- Lightbox ---------- */
+      .visor {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 60px 20px 24px;
+        background: rgba(5, 9, 17, 0.88);
+        backdrop-filter: blur(6px);
+      }
+
+      .visor.abierto {
+        display: flex;
+        animation: aparecer 0.2s ease;
+      }
+
+      .visor img {
+        max-width: min(1000px, 100%);
+        max-height: calc(100vh - 140px);
+        object-fit: contain;
+        border: 1px solid #344b69;
+        border-radius: 12px;
+        background: #0b1220;
+        box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .visor-titulo {
+        margin: 0;
+        color: var(--texto);
+        font-weight: 600;
+        text-align: center;
+      }
+
+      .visor-cerrar {
+        position: absolute;
+        top: 18px;
+        right: 22px;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 1px solid #344b69;
+        background: var(--superficie-2);
+        color: var(--texto);
+        cursor: pointer;
+        font-size: 1.4rem;
+      }
+
+      .visor-cerrar:hover {
+        background: #20314a;
+      }
+      .visor-cerrar svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      .visor a:focus-visible,
+      .visor-cerrar:focus-visible,
+      .lista-evidencias a:focus-visible,
+      .boton:focus-visible {
+        outline: 2px solid var(--azul);
+        outline-offset: 2px;
+      }
+
+      @keyframes aparecer {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* ---------- Repositorio ---------- */
+      .repositorio {
+        padding: 54px 0 64px;
       }
 
       .repositorio-tarjeta {
-        padding: 23px;
+        padding: 34px;
+        border: 1px solid #344b69;
+        border-radius: 18px;
+        background: linear-gradient(120deg, #15243a, #111c2e);
       }
 
       .repositorio-cabecera {
-        flex-direction: column;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+
+      .repositorio-icono {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 54px;
+        height: 54px;
+        flex-shrink: 0;
+        border-radius: 14px;
+        background: #1e3a5f;
+        color: var(--azul);
+      }
+
+      .repositorio-icono svg {
+        width: 28px;
+        height: 28px;
+      }
+
+      .repositorio-cabecera > div:last-child {
+        min-width: 0;
+      }
+      .repositorio-tarjeta p {
+        color: var(--suave);
+        margin: 6px 0 0;
+      }
+
+      /* ---------- Footer ---------- */
+      footer {
+        padding: 28px 0;
+        background: #070d17;
+        border-top: 1px solid var(--borde);
       }
 
       .footer-contenido {
-        align-items: flex-start;
-        flex-direction: column;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
       }
 
-      .lightbox {
-        padding: 60px 12px 18px;
+      .footer-marca {
+        margin: 0;
+        color: var(--texto);
+        font-size: 0.95rem;
       }
 
-      .lightbox-imagen {
-        max-width: 96vw;
-        max-height: 75vh;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      html {
-        scroll-behavior: auto;
+      .footer-enlaces {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 22px;
       }
 
-      *,
-      *::before,
-      *::after {
-        transition: none !important;
+      footer a {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--azul);
+        text-decoration: none;
+        font-size: 0.92rem;
       }
-    }
-  </style>
-</head>
 
-<body>
-  <header>
-    <nav class="contenedor">
-      <a class="marca" href="#inicio">
-        <i data-lucide="clipboard-list" aria-hidden="true"></i>
-        <span>PFO2 · Sistema de Gestión de Tareas</span>
-      </a>
+      footer a:hover {
+        color: #bfdbfe;
+        text-decoration: underline;
+      }
+      footer a svg {
+        width: 18px;
+        height: 18px;
+      }
 
-      <div class="enlaces">
-        <a href="#caracteristicas">Características</a>
-        <a href="#tecnologias">Tecnologías</a>
-        <a href="#endpoints">Endpoints</a>
-        <a href="#evidencias">Evidencias</a>
-        <a href="#repositorio">Repositorio</a>
-      </div>
-    </nav>
-  </header>
+      /* ---------- Responsive ---------- */
+      @media (max-width: 950px) {
+        .respuestas {
+          grid-template-columns: 1fr;
+        }
 
-  <main>
-    <!-- Portada -->
-    <section class="hero" id="inicio">
-      <div class="contenedor hero-grid">
-        <div>
-          <span class="etiqueta">
-            <i data-lucide="graduation-cap" aria-hidden="true"></i>
-            Proyecto Final Obligatorio 2
-          </span>
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+        .visual {
+          max-width: 460px;
+        }
+        .rejilla {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .dos-columnas {
+          grid-template-columns: 1fr;
+        }
+      }
 
-          <h1>Sistema de Gestión de Tareas</h1>
+      @media (max-width: 650px) {
+        nav {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+        .enlaces {
+          gap: 10px 15px;
+        }
+        .hero {
+          padding: 54px 0;
+        }
+        .rejilla {
+          grid-template-columns: 1fr;
+        }
+        .tecnologias {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .repositorio-tarjeta {
+          padding: 23px;
+        }
+        .footer-contenido {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
 
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Íconos de marcas (Lucide ya no los incluye) -->
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <symbol
+        id="i-github"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"
+        />
+        <path d="M9 18c-4.51 2-5-2-7-2" />
+      </symbol>
+      <symbol
+        id="i-linkedin"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"
+        />
+        <rect width="4" height="12" x="2" y="9" />
+        <circle cx="4" cy="4" r="2" />
+      </symbol>
+    </svg>
+
+    <header>
+      <nav class="contenedor">
+        <a class="marca" href="#inicio">
+          <i data-lucide="clipboard-list" aria-hidden="true"></i>
+          <span>PFO2 · Sistema de Gestión de Tareas</span>
+        </a>
+        <div class="enlaces">
+          <a href="#caracteristicas">Características</a>
+          <a href="#tecnologias">Tecnologías</a>
+          <a href="#endpoints">Endpoints</a>
+          <a href="#respuestas">Respuestas</a>
+          <a href="#evidencias">Evidencias</a>
+          <a href="#repositorio">Repositorio</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" id="inicio">
+        <div class="contenedor hero-grid">
+          <div>
+            <span class="etiqueta">
+              <i data-lucide="graduation-cap" aria-hidden="true"></i>
+              Proyecto Final Obligatorio 2
+            </span>
+            <h1>Sistema de Gestión de Tareas</h1>
+            <p>
+              API desarrollada con Python y Flask para registrar usuarios,
+              validar credenciales y mostrar una página HTML de bienvenida.
+              Incluye un cliente de consola y utiliza SQLite para almacenar los
+              usuarios de forma persistente.
+            </p>
+            <div class="botones">
+              <a
+                class="boton boton-principal"
+                href="https://github.com/ailenpaez/PFO2-sistema-gestion-tareas"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <svg class="ic" aria-hidden="true">
+                  <use href="#i-github" />
+                </svg>
+                Ver repositorio
+              </a>
+              <a
+                class="boton boton-secundario"
+                href="https://github.com/ailenpaez/PFO2-sistema-gestion-tareas#readme"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <i data-lucide="book-open" aria-hidden="true"></i>
+                Leer documentación
+              </a>
+            </div>
+          </div>
+
+          <div class="visual" aria-label="Resumen visual del proyecto">
+            <div class="visual-titulo">
+              <i data-lucide="clipboard-check" aria-hidden="true"></i>
+              <span>Componentes del sistema</span>
+            </div>
+            <div class="visual-linea">
+              <i data-lucide="check-circle-2" aria-hidden="true"></i> Registro
+              de usuarios
+            </div>
+            <div class="visual-linea">
+              <i data-lucide="check-circle-2" aria-hidden="true"></i> Validación
+              de credenciales
+            </div>
+            <div class="visual-linea">
+              <i data-lucide="check-circle-2" aria-hidden="true"></i>
+              Persistencia con SQLite
+            </div>
+            <div class="visual-linea">
+              <i data-lucide="terminal" aria-hidden="true"></i> Cliente de
+              consola
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="contenedor" id="caracteristicas">
+        <h2 class="titulo-seccion">Características principales</h2>
+        <p class="subtitulo">
+          Componentes y funcionalidades implementados en el proyecto.
+        </p>
+
+        <div class="rejilla">
+          <article class="tarjeta">
+            <div class="icono icono-azul">
+              <i data-lucide="user-round-plus" aria-hidden="true"></i>
+            </div>
+            <h3>Registro de usuarios</h3>
+            <p>
+              Permite registrar usuarios, validar campos obligatorios y detectar
+              nombres duplicados.
+            </p>
+          </article>
+          <article class="tarjeta">
+            <div class="icono icono-verde">
+              <i data-lucide="shield-check" aria-hidden="true"></i>
+            </div>
+            <h3>Inicio de sesión</h3>
+            <p>
+              Valida las credenciales y comprueba las contraseñas mediante hash.
+            </p>
+          </article>
+          <article class="tarjeta">
+            <div class="icono icono-violeta">
+              <i data-lucide="database" aria-hidden="true"></i>
+            </div>
+            <h3>Persistencia con SQLite</h3>
+            <p>
+              Almacena los usuarios en una base de datos local, con contraseñas
+              hasheadas.
+            </p>
+          </article>
+          <article class="tarjeta">
+            <div class="icono icono-naranja">
+              <i data-lucide="terminal" aria-hidden="true"></i>
+            </div>
+            <h3>Cliente de consola</h3>
+            <p>Permite interactuar con la API desde un menú en terminal.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="contenedor dos-columnas" id="tecnologias">
+        <div class="texto-proyecto">
+          <h2 class="titulo-seccion">Sobre el proyecto</h2>
           <p>
-            API desarrollada con Python y Flask para registrar usuarios,
-            validar credenciales y mostrar una página HTML de bienvenida.
-            Incluye un cliente de consola y utiliza SQLite para almacenar
-            los usuarios de forma persistente.
+            Este trabajo forma parte del Proyecto Final Obligatorio 2 (PFO2).
+            Consiste en una API desarrollada con Python y Flask, acompañada de
+            un cliente de consola. El sistema permite registrar usuarios,
+            validar sus credenciales y conservar la información en SQLite.
           </p>
+          <div class="aviso">
+            <i data-lucide="info" aria-hidden="true"></i>
+            <div>
+              <strong>Alcance actual</strong>
+              <p>
+                El endpoint <code>/tareas</code> muestra una página HTML
+                estática de bienvenida. Esta versión todavía no implementa
+                operaciones para crear, editar, eliminar o listar tareas
+                almacenadas.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="titulo-seccion">Tecnologías utilizadas</h2>
+          <div class="tecnologias">
+            <div class="tecnologia">
+              <i data-lucide="code-2" aria-hidden="true"></i
+              ><span>Python 3</span>
+            </div>
+            <div class="tecnologia">
+              <i data-lucide="flask-conical" aria-hidden="true"></i
+              ><span>Flask</span>
+            </div>
+            <div class="tecnologia">
+              <i data-lucide="database" aria-hidden="true"></i
+              ><span>SQLite</span>
+            </div>
+            <div class="tecnologia">
+              <i data-lucide="globe" aria-hidden="true"></i
+              ><span>Requests</span>
+            </div>
+            <div class="tecnologia">
+              <i data-lucide="shield-check" aria-hidden="true"></i
+              ><span>Werkzeug</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="contenedor" id="endpoints">
+        <h2 class="titulo-seccion">Endpoints de la API</h2>
+        <p class="subtitulo">Rutas disponibles en el servidor Flask.</p>
+        <div class="rejilla">
+          <article class="tarjeta">
+            <div class="icono icono-azul">
+              <i data-lucide="activity" aria-hidden="true"></i>
+            </div>
+            <h3><code>GET /</code></h3>
+            <p>Devuelve el mensaje de bienvenida y el estado del servidor.</p>
+          </article>
+          <article class="tarjeta">
+            <div class="icono icono-verde">
+              <i data-lucide="user-plus" aria-hidden="true"></i>
+            </div>
+            <h3><code>POST /registro</code></h3>
+            <p>Registra usuarios en la base de datos SQLite.</p>
+          </article>
+          <article class="tarjeta">
+            <div class="icono icono-violeta">
+              <i data-lucide="lock-keyhole" aria-hidden="true"></i>
+            </div>
+            <h3><code>POST /login</code></h3>
+            <p>Valida las credenciales del usuario.</p>
+          </article>
+          <article class="tarjeta">
+            <div class="icono icono-naranja">
+              <i data-lucide="monitor" aria-hidden="true"></i>
+            </div>
+            <h3><code>GET /tareas</code></h3>
+            <p>Muestra una página HTML estática de bienvenida.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="contenedor" id="respuestas">
+        <h2 class="titulo-seccion">Respuestas conceptuales</h2>
+        <p class="subtitulo">
+          Preguntas del PFO2 respondidas en función de lo implementado en este
+          proyecto.
+        </p>
+
+        <div class="respuestas">
+          <article class="respuesta">
+            <div class="respuesta-cabecera">
+              <div class="icono icono-verde">
+                <i data-lucide="shield-check" aria-hidden="true"></i>
+              </div>
+              <h3>¿Por qué hashear contraseñas?</h3>
+            </div>
+            <p>
+              Hashear contraseñas permite almacenarlas sin guardar su valor
+              original en texto plano. En este proyecto se utiliza
+              <strong>Werkzeug</strong> para generar un hash antes de guardar la
+              contraseña en SQLite. Cuando una persona intenta iniciar sesión,
+              el sistema verifica la contraseña ingresada mediante una función
+              de comprobación de hash, sin necesitar almacenar la contraseña
+              original.
+            </p>
+            <p>
+              Esto mejora la seguridad de la aplicación: si alguien accediera a
+              la base de datos, no encontraría las contraseñas directamente
+              legibles. El hash no reemplaza otras medidas de seguridad, pero
+              reduce el riesgo de exposición de las credenciales. Por eso, las
+              contraseñas no deben almacenarse en texto plano.
+            </p>
+          </article>
+
+          <article class="respuesta">
+            <div class="respuesta-cabecera">
+              <div class="icono icono-violeta">
+                <i data-lucide="database" aria-hidden="true"></i>
+              </div>
+              <h3>¿Cuáles son las ventajas de usar SQLite en este proyecto?</h3>
+            </div>
+            <p>
+              SQLite es adecuado para este proyecto porque es una base de datos
+              liviana, sencilla de configurar y no requiere instalar ni
+              administrar un servidor de base de datos independiente. La
+              información se almacena en un archivo local
+              (<code>tareas.db</code>), lo que facilita el desarrollo, las
+              pruebas y la entrega del trabajo.
+            </p>
+            <p>
+              Además, Python incluye el módulo <code>sqlite3</code>, por lo que
+              se puede conectar la aplicación a la base de datos sin instalar un
+              controlador externo adicional. SQLite permite ejecutar consultas
+              SQL, aplicar restricciones como <code>UNIQUE</code> para evitar
+              nombres de usuario duplicados y conservar los datos entre
+              ejecuciones del servidor. Para una aplicación pequeña, ofrece una
+              solución simple y eficiente.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="evidencias" id="evidencias">
+        <div class="contenedor">
+          <h2 class="titulo-seccion">Evidencias del proyecto</h2>
+          <p class="subtitulo">
+            Capturas de las pruebas del cliente, la API y la base de datos. Hacé
+            clic en un título para ver la imagen en pantalla.
+          </p>
+
+          <div class="grupo-evidencias">
+            <h3>Cliente de consola</h3>
+            <ul class="lista-evidencias">
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/cliente_menu.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Menú principal <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/cliente_registro.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Registro desde consola
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/cliente_login.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Inicio de sesión
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/cliente_notlogin.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Inicio de sesión fallido
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="grupo-evidencias">
+            <h3>Pruebas de la API</h3>
+            <ul class="lista-evidencias">
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/registroExitoso.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Registro exitoso
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/usuarioExistente.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Usuario existente
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/loginExitoso.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Inicio de sesión exitoso
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/passwordIncorrecta.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Contraseña incorrecta
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/loginUsuarioInexistente.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Usuario inexistente
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/inicioTareas.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Página HTML de tareas
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="grupo-evidencias">
+            <h3>Base de datos SQLite</h3>
+            <ul class="lista-evidencias">
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/vista_database.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Usuarios almacenados
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+              <li>
+                <a
+                  class="evidencia-link"
+                  href="https://ailenpaez.github.io/PFO2-sistema-gestion-tareas/SS-evidencias/passwordHasheada.png"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  >Contraseña almacenada mediante hash
+                  <i data-lucide="image" aria-hidden="true"></i
+                ></a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="contenedor repositorio" id="repositorio">
+        <div class="repositorio-tarjeta">
+          <div class="repositorio-cabecera">
+            <div class="repositorio-icono">
+              <svg class="ic" aria-hidden="true"><use href="#i-github" /></svg>
+            </div>
+            <div>
+              <h2 class="titulo-seccion">Repositorio y documentación</h2>
+              <p>
+                Consultá el código fuente, las instrucciones de instalación y
+                las respuestas conceptuales del PFO2.
+              </p>
+            </div>
+          </div>
 
           <div class="botones">
-            <a class="boton boton-principal"
-               href="https://github.com/ailenpaez/PFO2-sistema-gestion-tareas"
-               target="_blank" rel="noopener noreferrer">
-              <i data-lucide="github" aria-hidden="true"></i>
-              Ver repositorio
+            <a
+              class="boton boton-principal"
+              href="https://github.com/ailenpaez/PFO2-sistema-gestion-tareas"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i data-lucide="external-link" aria-hidden="true"></i>
+              Abrir repositorio
             </a>
-
-            <a class="boton boton-secundario" href="README.md">
-              <i data-lucide="book-open" aria-hidden="true"></i>
-              Leer documentación
+            <a
+              class="boton boton-secundario"
+              href="https://github.com/ailenpaez/PFO2-sistema-gestion-tareas#readme"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i data-lucide="file-text" aria-hidden="true"></i>
+              Leer README
             </a>
           </div>
         </div>
+      </section>
+    </main>
 
-        <div class="visual" aria-label="Resumen visual del proyecto">
-          <div class="visual-titulo">
-            <i data-lucide="clipboard-check" aria-hidden="true"></i>
-            <span>Componentes del sistema</span>
-          </div>
-
-          <div class="visual-linea">
-            <i data-lucide="check-circle-2" aria-hidden="true"></i>
-            Registro de usuarios
-          </div>
-
-          <div class="visual-linea">
-            <i data-lucide="check-circle-2" aria-hidden="true"></i>
-            Validación de credenciales
-          </div>
-
-          <div class="visual-linea">
-            <i data-lucide="check-circle-2" aria-hidden="true"></i>
-            Persistencia con SQLite
-          </div>
-
-          <div class="visual-linea">
-            <i data-lucide="terminal" aria-hidden="true"></i>
-            Cliente de consola
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Características -->
-    <section class="contenedor" id="caracteristicas">
-      <h2 class="titulo-seccion">Características principales</h2>
-      <p class="subtitulo">
-        Componentes y funcionalidades implementados en el proyecto.
-      </p>
-
-      <div class="rejilla">
-        <article class="tarjeta">
-          <div class="icono icono-azul">
-            <i data-lucide="user-round-plus" aria-hidden="true"></i>
-          </div>
-          <h3>Registro de usuarios</h3>
-          <p>
-            Permite registrar usuarios, validar campos obligatorios
-            y detectar nombres duplicados.
-          </p>
-        </article>
-
-        <article class="tarjeta">
-          <div class="icono icono-verde">
-            <i data-lucide="shield-check" aria-hidden="true"></i>
-          </div>
-          <h3>Inicio de sesión</h3>
-          <p>
-            Valida las credenciales y comprueba las contraseñas mediante hash.
-          </p>
-        </article>
-
-        <article class="tarjeta">
-          <div class="icono icono-violeta">
-            <i data-lucide="database" aria-hidden="true"></i>
-          </div>
-          <h3>Persistencia con SQLite</h3>
-          <p>
-            Almacena los usuarios en una base de datos local,
-            con contraseñas hasheadas.
-          </p>
-        </article>
-
-        <article class="tarjeta">
-          <div class="icono icono-naranja">
-            <i data-lucide="terminal" aria-hidden="true"></i>
-          </div>
-          <h3>Cliente de consola</h3>
-          <p>
-            Permite interactuar con la API desde un menú en terminal.
-          </p>
-        </article>
-      </div>
-    </section>
-
-    <!-- Sobre el proyecto y tecnologías -->
-    <section class="contenedor dos-columnas" id="tecnologias">
-      <div class="texto-proyecto">
-        <h2 class="titulo-seccion">Sobre el proyecto</h2>
-
-        <p>
-          Este trabajo forma parte del Proyecto Final Obligatorio 2 (PFO2).
-          Consiste en una API desarrollada con Python y Flask, acompañada de
-          un cliente de consola. El sistema permite registrar usuarios,
-          validar sus credenciales y conservar la información en SQLite.
+    <footer id="contacto">
+      <div class="contenedor footer-contenido">
+        <p class="footer-marca">
+          © 2026 Ailén Páez | PFO2 Programación de Redes
         </p>
-
-        <div class="aviso">
-          <i data-lucide="info" aria-hidden="true"></i>
-
-          <div>
-            <strong>Alcance actual</strong>
-            <p>
-              El endpoint <code>/tareas</code> muestra una página HTML estática
-              de bienvenida. Esta versión todavía no implementa operaciones
-              para crear, editar, eliminar o listar tareas almacenadas.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h2 class="titulo-seccion">Tecnologías utilizadas</h2>
-
-        <div class="tecnologias">
-          <div class="tecnologia">
-            <i data-lucide="code-2" aria-hidden="true"></i>
-            <span>Python 3</span>
-          </div>
-
-          <div class="tecnologia">
-            <i data-lucide="flask-conical" aria-hidden="true"></i>
-            <span>Flask</span>
-          </div>
-
-          <div class="tecnologia">
-            <i data-lucide="database" aria-hidden="true"></i>
-            <span>SQLite</span>
-          </div>
-
-          <div class="tecnologia">
-            <i data-lucide="globe" aria-hidden="true"></i>
-            <span>Requests</span>
-          </div>
-
-          <div class="tecnologia">
-            <i data-lucide="shield-check" aria-hidden="true"></i>
-            <span>Werkzeug</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Endpoints -->
-    <section class="contenedor" id="endpoints">
-      <h2 class="titulo-seccion">Endpoints de la API</h2>
-      <p class="subtitulo">Rutas disponibles en el servidor Flask.</p>
-
-      <div class="rejilla">
-        <article class="tarjeta">
-          <div class="icono icono-azul">
-            <i data-lucide="activity" aria-hidden="true"></i>
-          </div>
-          <h3><code>GET /</code></h3>
-          <p>Devuelve el mensaje de bienvenida y el estado del servidor.</p>
-        </article>
-
-        <article class="tarjeta">
-          <div class="icono icono-verde">
-            <i data-lucide="user-plus" aria-hidden="true"></i>
-          </div>
-          <h3><code>POST /registro</code></h3>
-          <p>Registra usuarios en la base de datos SQLite.</p>
-        </article>
-
-        <article class="tarjeta">
-          <div class="icono icono-violeta">
-            <i data-lucide="lock-keyhole" aria-hidden="true"></i>
-          </div>
-          <h3><code>POST /login</code></h3>
-          <p>Valida las credenciales del usuario.</p>
-        </article>
-
-        <article class="tarjeta">
-          <div class="icono icono-naranja">
-            <i data-lucide="monitor" aria-hidden="true"></i>
-          </div>
-          <h3><code>GET /tareas</code></h3>
-          <p>Muestra una página HTML estática de bienvenida.</p>
-        </article>
-      </div>
-    </section>
-
-    <!-- Evidencias -->
-    <section class="evidencias" id="evidencias">
-      <div class="contenedor">
-        <h2 class="titulo-seccion">Evidencias del proyecto</h2>
-        <p class="subtitulo">
-          Capturas de las pruebas del cliente, la API y la base de datos.
-          Hacé clic en cualquier imagen para ampliarla.
-        </p>
-
-        <!-- Cliente de consola -->
-        <div class="grupo-evidencias">
-          <h3>Cliente de consola</h3>
-
-          <div class="rejilla-evidencias">
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Menú principal</h3>
-                <p>Opciones de la terminal.</p>
-              </div>
-              <img src="/SS-evidencias/cliente_menu.png"
-                   alt="Menú del cliente" loading="lazy">
-            </article>
-
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Registro desde consola</h3>
-                <p>Registro de usuario.</p>
-              </div>
-              <img src="/SS-evidencias/cliente_registro.png"
-                   alt="Registro desde consola" loading="lazy">
-            </article>
-
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Inicio de sesión</h3>
-                <p>Validación de credenciales.</p>
-              </div>
-              <img src="/SS-evidencias/cliente_login.png"
-                   alt="Login desde el cliente" loading="lazy">
-            </article>
-
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Inicio fallido</h3>
-                <p>Prueba de credenciales no válidas.</p>
-              </div>
-              <img src="/SS-evidencias/cliente_notlogin.png"
-                   alt="Login fallido desde el cliente" loading="lazy">
-            </article>
-          </div>
-        </div>
-
-        <!-- Pruebas de la API -->
-        <div class="grupo-evidencias">
-          <h3>Pruebas de la API</h3>
-
-          <div class="rejilla-evidencias">
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Registro exitoso</h3>
-                <p>Usuario creado correctamente.</p>
-              </div>
-              <img src="/SS-evidencias/registroExitoso.png"
-                   alt="Registro exitoso" loading="lazy">
-            </article>
-
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Usuario existente</h3>
-                <p>Validación de duplicados.</p>
-              </div>
-              <img src="/SS-evidencias/usuarioExistente.png"
-                   alt="Usuario existente" loading="lazy">
-            </article>
-
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Login exitoso</h3>
-                <p>Credenciales válidas.</p>
-              </div>
-              <img src="/SS-evidencias/loginExitoso.png"
-                   alt="Login exitoso" loading="lazy">
-            </article>
-
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Contraseña incorrecta</h3>
-                <p>Validación de acceso.</p>
-              </div>
-              <img src="/SS-evidencias/passwordIncorrecta.png"
-                   alt="Contraseña incorrecta" loading="lazy">
-            </article>
-
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Usuario inexistente</h3>
-                <p>Credenciales no registradas.</p>
-              </div>
-              <img src="/SS-evidencias/loginUsuarioInexistente.png"
-                   alt="Usuario inexistente" loading="lazy">
-            </article>
-
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Página de tareas</h3>
-                <p>Página HTML de bienvenida.</p>
-              </div>
-              <img src="/SS-evidencias/inicioTareas.png"
-                   alt="Página de tareas" loading="lazy">
-            </article>
-          </div>
-        </div>
-
-        <!-- Base de datos -->
-        <div class="grupo-evidencias">
-          <h3>Base de datos SQLite</h3>
-
-          <div class="rejilla-evidencias">
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Usuarios almacenados</h3>
-                <p>Datos persistidos en SQLite.</p>
-              </div>
-              <img src="/SS-evidencias/vista_database.png"
-                   alt="Vista de SQLite" loading="lazy">
-            </article>
-
-            <article class="tarjeta evidencia">
-              <div class="evidencia-info">
-                <h3>Contraseña hasheada</h3>
-                <p>Contraseña almacenada como hash.</p>
-              </div>
-              <img src="/SS-evidencias/passHasheada.png"
-                   alt="Hash de contraseña" loading="lazy">
-            </article>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Repositorio y documentación -->
-    <section class="contenedor repositorio" id="repositorio">
-      <div class="repositorio-tarjeta">
-        <div class="repositorio-cabecera">
-          <div class="repositorio-icono">
-            <i data-lucide="github" aria-hidden="true"></i>
-          </div>
-
-          <div>
-            <h2 class="titulo-seccion">Repositorio y documentación</h2>
-            <p>
-              Consultá el código fuente, las instrucciones de instalación
-              y las respuestas conceptuales del PFO2.
-            </p>
-          </div>
-        </div>
-
-        <div class="botones">
-          <a class="boton boton-principal"
-             href="https://github.com/ailenpaez/PFO2-sistema-gestion-tareas"
-             target="_blank" rel="noopener noreferrer">
-            <i data-lucide="external-link" aria-hidden="true"></i>
-            Abrir repositorio
+        <div class="footer-enlaces">
+          <a
+            href="https://github.com/ailenpaez/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg class="ic" aria-hidden="true"><use href="#i-github" /></svg>
+            github.com/ailenpaez
           </a>
-
-          <a class="boton boton-secundario" href="README.md">
-            <i data-lucide="file-text" aria-hidden="true"></i>
-            Leer README
+          <a
+            href="https://www.linkedin.com/in/paezailenj/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <svg class="ic" aria-hidden="true"><use href="#i-linkedin" /></svg>
+            linkedin.com/in/paezailenj
           </a>
+          <a href="#inicio">Volver al inicio ↑</a>
         </div>
       </div>
-    </section>
-  </main>
+    </footer>
 
-  <footer>
-    <div class="contenedor footer-contenido">
-      <div>
-        <strong>Sistema de Gestión de Tareas · PFO2</strong>
-        <p>Proyecto académico desarrollado con Python, Flask y SQLite.</p>
-      </div>
-
-      <a href="#inicio">Volver al inicio ↑</a>
+    <!-- Visor de imágenes (se abre sobre la página, en segundo plano oscurecido) -->
+    <div
+      class="visor"
+      id="visor"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Vista de evidencia"
+      hidden
+    >
+      <button
+        class="visor-cerrar"
+        id="visor-cerrar"
+        type="button"
+        aria-label="Cerrar imagen"
+      >
+        <i data-lucide="x" aria-hidden="true"></i>
+      </button>
+      <img id="visor-img" src="" alt="" />
+      <p class="visor-titulo" id="visor-titulo"></p>
     </div>
-  </footer>
 
-  <!-- Visor ampliado de imágenes -->
-  <div class="lightbox"
-       id="lightbox"
-       role="dialog"
-       aria-modal="true"
-       aria-label="Imagen ampliada">
+    <script>
+      if (window.lucide) lucide.createIcons();
 
-    <button class="lightbox-cerrar"
-            id="lightboxCerrar"
-            type="button"
-            aria-label="Cerrar imagen">
-      <i data-lucide="x" aria-hidden="true"></i>
-    </button>
+      (function () {
+        var visor = document.getElementById("visor");
+        var img = document.getElementById("visor-img");
+        var titulo = document.getElementById("visor-titulo");
+        var cerrar = document.getElementById("visor-cerrar");
+        var ultimoEnlace = null;
 
-    <img class="lightbox-imagen"
-         id="lightboxImagen"
-         src=""
-         alt="">
-
-    <p class="lightbox-caption" id="lightboxCaption"></p>
-  </div>
-
-  <script>
-    // Inicializar iconos Lucide
-    if (window.lucide) {
-      lucide.createIcons();
-    }
-
-    // Visor de imágenes
-    const lightbox = document.getElementById("lightbox");
-    const lightboxImagen = document.getElementById("lightboxImagen");
-    const lightboxCaption = document.getElementById("lightboxCaption");
-    const lightboxCerrar = document.getElementById("lightboxCerrar");
-
-    const imagenesEvidencias = document.querySelectorAll(".evidencia img");
-
-    function abrirLightbox(imagen) {
-      lightboxImagen.src = imagen.src;
-      lightboxImagen.alt = imagen.alt;
-      lightboxCaption.textContent = imagen.alt || "Evidencia del proyecto";
-
-      lightbox.classList.add("activo");
-      document.body.classList.add("lightbox-abierto");
-      lightboxCerrar.focus();
-    }
-
-    function cerrarLightbox() {
-      lightbox.classList.remove("activo");
-      document.body.classList.remove("lightbox-abierto");
-
-      // Limpiar la imagen cuando se cierra el visor
-      lightboxImagen.src = "";
-      lightboxImagen.alt = "";
-      lightboxCaption.textContent = "";
-    }
-
-    imagenesEvidencias.forEach((imagen) => {
-      imagen.addEventListener("click", () => {
-        abrirLightbox(imagen);
-      });
-
-      imagen.addEventListener("keydown", (evento) => {
-        if (evento.key === "Enter" || evento.key === " ") {
-          evento.preventDefault();
-          abrirLightbox(imagen);
+        function abrir(enlace) {
+          var texto = enlace.textContent.trim();
+          ultimoEnlace = enlace;
+          img.src = enlace.href;
+          img.alt = texto;
+          titulo.textContent = texto;
+          visor.hidden = false;
+          visor.classList.add("abierto");
+          document.body.classList.add("sin-scroll");
+          cerrar.focus();
         }
-      });
 
-      imagen.setAttribute("tabindex", "0");
-      imagen.setAttribute("role", "button");
-      imagen.setAttribute("aria-label", "Ampliar imagen: " + imagen.alt);
-    });
+        function cerrarVisor() {
+          visor.classList.remove("abierto");
+          visor.hidden = true;
+          img.src = "";
+          document.body.classList.remove("sin-scroll");
+          if (ultimoEnlace) ultimoEnlace.focus();
+        }
 
-    lightboxCerrar.addEventListener("click", cerrarLightbox);
+        document.querySelectorAll(".evidencia-link").forEach(function (enlace) {
+          enlace.addEventListener("click", function (e) {
+            // Clic normal: abre el visor. Ctrl/Cmd/clic medio siguen abriendo pestaña nueva.
+            if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+            e.preventDefault();
+            abrir(enlace);
+          });
+        });
 
-    // Cerrar al hacer clic en el fondo oscuro
-    lightbox.addEventListener("click", (evento) => {
-      if (evento.target === lightbox) {
-        cerrarLightbox();
-      }
-    });
+        cerrar.addEventListener("click", cerrarVisor);
 
-    // Cerrar con Escape
-    document.addEventListener("keydown", (evento) => {
-      if (evento.key === "Escape" && lightbox.classList.contains("activo")) {
-        cerrarLightbox();
-      }
-    });
+        visor.addEventListener("click", function (e) {
+          if (e.target === visor) cerrarVisor();
+        });
 
-    // Cerrar al hacer clic sobre la imagen ampliada
-    lightboxImagen.addEventListener("click", cerrarLightbox);
-  </script>
-</body>
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && visor.classList.contains("abierto"))
+            cerrarVisor();
+        });
+      })();
+    </script>
+  </body>
 </html>
